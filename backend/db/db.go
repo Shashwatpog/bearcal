@@ -10,7 +10,7 @@ import (
 
 var DB *sql.DB
 
-func Connnect() {
+func Connect() {
 	var err error
 	DB, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
