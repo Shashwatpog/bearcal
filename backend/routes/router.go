@@ -11,6 +11,7 @@ func SetupRoutes(r *gin.Engine) {
 		api.GET("/test", Test)
 		api.GET("/terms", handlers.GetTerms)
 		api.GET("/course", handlers.GetCourseByCRN)
+		api.GET("/filter", handlers.GetCoursesBySubjectAndClass)
 	}
 }
 
