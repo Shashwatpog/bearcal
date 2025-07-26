@@ -36,15 +36,12 @@ func FetchCourseByCRN(term string, crn int) (models.Course, error) {
 	return course, err
 }
 
-func FetchCoursesBySearch(term string, query string) ([]models.Course, error) {
+func FetchCoursesBySubjectAndClass(term string, subject string, classNumber string) ([]models.Course, error) {
 	rows, err := DB.Query(`
-			SELECT crn, subject, class_number, title, section, credits, instructor, campus, time, mode, room, dept, dates
-			FROM courses 
-			WHERE term = $1 
-			AND (
-				class_number ILIKE '%' || $2 || '%' OR 
-				subject ILIKE '%' || $2 || '%'
-			)`, term, query)
+		SELECT crn, subject, class_number, title, section, credits, instructor, campus, time, mode, room, dept, dates
+		FROM courses 
+		WHERE term = $1 AND subject = $2 AND class_number = $3
+	`, term, subject, classNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -61,31 +58,38 @@ func FetchCoursesBySearch(term string, query string) ([]models.Course, error) {
 		}
 		courses = append(courses, c)
 	}
-
 	return courses, nil
 }
 
-func FetchCoursesBySubjectAndClass(term string, subject string, classNumber string) ([]models.Course, error) {
+func FetchCoursesBySearch(term string, query string) ([]models.Course, error) {
 	rows, err := DB.Query(`
-			SELECT crn, subject, class_number, title, section, credits, instructor, campus, time, mode, room, dept, dates
-			FROM courses 
-			WHERE term = $1 AND subject = $2 AND class_number = $3
-			`, term, subject, classNumber)
+		SELECT crn, subject, class_number, title, section, credits, instructor, campus, time, mode, room, dept, dates,
+		similarity(title, $2) as score
+		FROM courses
+		WHERE term = $1
+		AND title % $2
+		ORDER BY score DESC
+		LIMIT 50
+	`, term, query)
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	var courses []models.Course
+	var score float64
 	for rows.Next() {
 		var c models.Course
 		if err := rows.Scan(
 			&c.CRN, &c.Subject, &c.ClassNumber, &c.Title, &c.Section, &c.Credits,
 			&c.Instructor, &c.Campus, &c.Time, &c.Mode, &c.Room, &c.Dept, &c.Dates,
+			&score,
 		); err != nil {
 			return nil, err
 		}
 		courses = append(courses, c)
 	}
+
 	return courses, nil
 }

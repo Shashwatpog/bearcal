@@ -14,4 +14,5 @@ type Course struct {
 	Room        string
 	Dept        string
 	Dates       string
+	Score       float64
 }
