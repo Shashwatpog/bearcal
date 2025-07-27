@@ -22,8 +22,9 @@ func GenerateICS(courses []models.Course) *ics.Calendar {
 		if err != nil {
 			continue
 		}
-		eventStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), startTime.Hour(), startTime.Minute(), 0, 0, time.Local).UTC()
-		eventEnd := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), endTime.Hour(), endTime.Minute(), 0, 0, time.Local).UTC()
+		firstMeetingDate := AlignStartDateWithDay(startDate, days)
+		eventStart := time.Date(firstMeetingDate.Year(), firstMeetingDate.Month(), firstMeetingDate.Day(), startTime.Hour(), startTime.Minute(), 0, 0, time.Local).UTC()
+		eventEnd := time.Date(firstMeetingDate.Year(), firstMeetingDate.Month(), firstMeetingDate.Day(), endTime.Hour(), endTime.Minute(), 0, 0, time.Local).UTC()
 
 		until := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 0, time.UTC).Format("20060102T150405Z")
 
@@ -61,6 +62,7 @@ func ExtractDays(raw string) []string {
 			days = append(days, val)
 		}
 	}
+
 	return days
 }
 
@@ -113,4 +115,25 @@ func ParseDates(dateRange string) (time.Time, time.Time, error) {
 	}
 
 	return startDate, endDate, nil
+}
+
+func AlignStartDateWithDay(startDate time.Time, days []string) time.Time {
+	dayMap := map[string]time.Weekday{
+		"MO": time.Monday,
+		"TU": time.Tuesday,
+		"WE": time.Wednesday,
+		"TH": time.Thursday,
+		"FR": time.Friday,
+	}
+
+	for i := 0; i < 7; i++ {
+		current := startDate.AddDate(0, 0, i)
+		for _, d := range days {
+			if current.Weekday() == dayMap[d] {
+				return current
+			}
+		}
+	}
+
+	return startDate
 }
