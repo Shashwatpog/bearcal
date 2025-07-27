@@ -13,6 +13,7 @@ func SetupRoutes(r *gin.Engine) {
 		api.GET("/course", handlers.GetCourseByCRN)
 		api.GET("/filter", handlers.GetCoursesBySubjectAndClass)
 		api.GET("/search", handlers.GetCoursesBySearch)
+		api.POST("/generate", handlers.GenerateICSFile)
 	}
 }
 
