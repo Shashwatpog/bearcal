@@ -14,8 +14,15 @@ func GenerateICS(courses []models.Course) *ics.Calendar {
 	cal.SetMethod(ics.MethodRequest)
 
 	for _, course := range courses {
+
 		startTime, endTime, days := ParseMeetingTime(course.Time)
 		if startTime.IsZero() || endTime.IsZero() || len(days) == 0 {
+			continue
+		}
+		if course.Time == "" || strings.Contains(strings.ToLower(course.Time), "tba") || strings.Contains(strings.ToLower(course.Time), "asynchronous") {
+			continue
+		}
+		if course.Dates == "" || strings.Contains(strings.ToLower(course.Dates), "tba") {
 			continue
 		}
 		startDate, endDate, err := ParseDates(course.Dates)
