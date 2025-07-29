@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"strconv"
+	"fmt"
 	"strings"
 	"time"
 
@@ -14,37 +14,44 @@ func GenerateICS(courses []models.Course) *ics.Calendar {
 	cal.SetMethod(ics.MethodRequest)
 
 	for _, course := range courses {
-
-		startTime, endTime, days := ParseMeetingTime(course.Time)
-		if startTime.IsZero() || endTime.IsZero() || len(days) == 0 {
-			continue
-		}
-		if course.Time == "" || strings.Contains(strings.ToLower(course.Time), "tba") || strings.Contains(strings.ToLower(course.Time), "asynchronous") {
-			continue
-		}
-		if course.Dates == "" || strings.Contains(strings.ToLower(course.Dates), "tba") {
-			continue
-		}
 		startDate, endDate, err := ParseDates(course.Dates)
 		if err != nil {
+			fmt.Println("Invalid date:", course.Dates, "Error:", err)
 			continue
 		}
-		firstMeetingDate := AlignStartDateWithDay(startDate, days)
-		eventStart := time.Date(firstMeetingDate.Year(), firstMeetingDate.Month(), firstMeetingDate.Day(), startTime.Hour(), startTime.Minute(), 0, 0, time.Local).UTC()
-		eventEnd := time.Date(firstMeetingDate.Year(), firstMeetingDate.Month(), firstMeetingDate.Day(), endTime.Hour(), endTime.Minute(), 0, 0, time.Local).UTC()
 
-		until := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 0, time.UTC).Format("20060102T150405Z")
+		timeBlocks := strings.Split(course.Time, "\n")
+		seenBlocks := map[string]bool{}
+		for _, block := range timeBlocks {
+			trimmed := strings.TrimSpace(block)
+			if trimmed == "" || strings.Contains(strings.ToLower(trimmed), "asynchronous") || seenBlocks[trimmed] {
+				continue
+			}
+			seenBlocks[trimmed] = true
+			lower := strings.ToLower(block)
+			if strings.Contains(lower, "tba") || strings.Contains(lower, "asynchronous") || strings.TrimSpace(block) == "" {
+				continue
+			}
+			startTime, endTime, days := ParseMeetingTime(block)
+			if startTime.IsZero() || endTime.IsZero() || len(days) == 0 {
+				continue
+			}
+			firstMeetingDate := AlignStartDateWithDay(startDate, days)
+			eventStart := time.Date(firstMeetingDate.Year(), firstMeetingDate.Month(), firstMeetingDate.Day(), startTime.Hour(), startTime.Minute(), 0, 0, time.Local).UTC()
+			eventEnd := time.Date(firstMeetingDate.Year(), firstMeetingDate.Month(), firstMeetingDate.Day(), endTime.Hour(), endTime.Minute(), 0, 0, time.Local).UTC()
 
-		crnStr := strconv.Itoa(course.CRN)
-		event := cal.AddEvent(crnStr)
-		event.SetSummary(course.Title)
-		event.SetDescription(course.Instructor + " - " + course.Mode)
-		event.SetLocation(course.Room)
-		event.SetStartAt(eventStart)
-		event.SetDuration(eventEnd.Sub(eventStart))
+			until := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 0, time.UTC).Format("20060102T150405Z")
 
-		rrule := "FREQ=WEEKLY;BYDAY=" + strings.Join(days, ",") + ";UNTIL=" + until
-		event.AddRrule(rrule)
+			event := cal.AddEvent(fmt.Sprintf("%d-%s", course.CRN, strings.ReplaceAll(block, " ", "")))
+			event.SetSummary(course.Title)
+			event.SetDescription(course.Instructor + " - " + course.Mode)
+			event.SetLocation(course.Room)
+			event.SetStartAt(eventStart)
+			event.SetDuration(eventEnd.Sub(eventStart))
+
+			rrule := "FREQ=WEEKLY;BYDAY=" + strings.Join(days, ",") + ";UNTIL=" + until
+			event.AddRrule(rrule)
+		}
 	}
 
 	return cal
@@ -105,20 +112,27 @@ func ParseMeetingTime(input string) (time.Time, time.Time, []string) {
 	return start, end, days
 }
 
-func ParseDates(dateRange string) (time.Time, time.Time, error) {
+func ParseDates(raw string) (time.Time, time.Time, error) {
+
+	lines := strings.Split(raw, "\n")
+	if len(lines) == 0 || !strings.Contains(lines[0], "-") {
+		return time.Time{}, time.Time{}, fmt.Errorf("invalid dates")
+	}
+
+	dateRange := strings.TrimSpace(lines[0])
 	elements := strings.Split(dateRange, " - ")
 	if len(elements) != 2 {
-		return time.Time{}, time.Time{}, nil
+		return time.Time{}, time.Time{}, fmt.Errorf("invalid date range format")
 	}
 
 	startDate, err := time.Parse("01/02/2006", strings.TrimSpace(elements[0]))
 	if err != nil {
-		return time.Time{}, time.Time{}, nil
+		return time.Time{}, time.Time{}, fmt.Errorf("date parsing failed")
 	}
 
 	endDate, err := time.Parse("01/02/2006", strings.TrimSpace(elements[1]))
 	if err != nil {
-		return time.Time{}, time.Time{}, nil
+		return time.Time{}, time.Time{}, fmt.Errorf("date parsing failed")
 	}
 
 	return startDate, endDate, nil
