@@ -28,7 +28,7 @@ export default function TermSelect({ selected, onSelect }: Props) {
     <div className="space-y-2">
       <Label>Select Term</Label>
       <Select value={selected || ""} onValueChange={onSelect}>
-        <SelectTrigger className="w-[200px]">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Choose a term" />
         </SelectTrigger>
         <SelectContent>

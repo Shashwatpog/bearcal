@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { use, useState } from "react";
 
 type Props = {
@@ -11,63 +11,87 @@ type Props = {
 };
 
 export default function CourseSearch({ onSearch }: Props) {
-  const [query, setQuery] = useState("");
-  const [mode, setMode] = useState<"keyword" | "crn" | "subjectClass">("keyword");
-  const [subject, setSubject] = useState("");
-  const [classNumber, setClassNumber] =  useState("");
+    const [activeTab, setActiveTab] = useState<"keyword" | "crn" | "subjectClass">("keyword");
+    const [query, setQuery] = useState("");
+    const [subject, setSubject] = useState("");
+    const [classNumber, setClassNumber] =  useState("");
 
-  return (
-    <div className="space-y-2">
-        <Label>Search Courses</Label>
-        <ToggleGroup 
-            type="single"
-            value={mode}
-            onValueChange={(val) => {
-                if (val) {
-                    setMode(val as "keyword" | "crn" | "subjectClass")
-                    setQuery("");
-                    setSubject("");
-                    setClassNumber("");
-                }
-        }} 
-        className="mb-2">
-            <ToggleGroupItem value = "keyword">Keyword</ToggleGroupItem>
-            <ToggleGroupItem value = "crn">CRN</ToggleGroupItem>
-            <ToggleGroupItem value = "subjectClass">Subject+Class</ToggleGroupItem>
-        </ToggleGroup>
+      const handleSearchClick = () => {
+            if (activeTab === "subjectClass") {
+            onSearch(`${subject}:${classNumber}`, "subjectClass");
+            } else {
+            onSearch(query, activeTab);
+            }
+        };
 
-        {mode === "subjectClass" ? (
-            <div className="flex gap-2">
-                <Input
-                    placeholder="Enter Subject Code (example : CS)"
+    return (
+        <div className="space-y-4">
+            <Label>Search Courses</Label>
+            <Tabs
+                value={activeTab}
+                onValueChange={(val) => {
+                setActiveTab(val as typeof activeTab);
+                setQuery("");
+                setSubject("");
+                setClassNumber("");
+                }}
+                className="w-full"
+            >
+                <TabsList className="grid grid-cols-3 w-full mb-4 bg-stone-300 rounded-md overflow-hidden">
+                <TabsTrigger className="text-black" value="keyword">Course Name</TabsTrigger>
+                <TabsTrigger className="text-black" value="crn">Course Number</TabsTrigger>
+                <TabsTrigger className="text-black" value="subjectClass">Subject + Class</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="keyword">
+                    <Input
+                    placeholder="example : Introduction to Programming"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full"
+                    />
+                </TabsContent>
+
+                <TabsContent value="crn">
+                    <Input
+                    placeholder="Enter 5-digit course number (ex: 15712)"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full"
+                    />
+                </TabsContent>
+
+                <TabsContent value="subjectClass">
+                    <div className="space-y-3">
+                    <div className="space-y-3">
+                    <Label>Subject Name</Label>
+                    <Input
+                    placeholder="Subject (ex : CS)"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value.toUpperCase())}
-                />
-                <Input
-                    placeholder="Enter Class Number (example : 1010)"
+                    />
+                    </div>
+                    <div className="space-y-3">
+                    <Label>Class Number</Label>
+                    <Input
+                    placeholder="Class Number (ex : 2080C)"
                     value={classNumber}
                     onChange={(e) => setClassNumber(e.target.value)}
-                />
-                <Button
-                    onClick={() => onSearch(`${subject}:${classNumber}`,"subjectClass")}
-                    disabled={!subject.trim() || !classNumber}
-                >
-                    Search
-                </Button>
-            </div>
-        ) : (
-            <div className="flex gap-2">
-            <Input
-                placeholder={mode === "crn" ? "Enter 5 digit CRN (example : 15712)" : "Enter course title (example : Introduction to Programming)"}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="w-full"
-            />
-            <Button onClick={() => onSearch(query, mode)} disabled={!query.trim()}>
+                    />
+                    </div>
+                    </div>
+                </TabsContent>
+            </Tabs>
+            <Button
+                className="w-full text-white bg-zinc-950 border-2 transition active:scale-95 duration-150 ease-in-out hover:opacity-90"
+                onClick={handleSearchClick}
+                disabled={
+                (activeTab === "subjectClass" && (!subject.trim() || !classNumber.trim())) ||
+                ((activeTab === "keyword" || activeTab === "crn") && !query.trim())
+                }
+            >
                 Search
             </Button>
-            </div>
-        )}
-    </div>
-  );
+        </div>
+    );
 }

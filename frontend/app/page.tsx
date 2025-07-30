@@ -7,19 +7,14 @@ import { Course } from "@/types/course";
 import { useState } from "react";
 
 
-
-
 export default function HomePage() {
   
   const [term, setTerm] = useState("");
-  const [query, setQuery] = useState("")
   const [results, setResults] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(false)
   const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
 
   const handleSearch = async (input: string, mode: "keyword" | "crn" | "subjectClass") => {
     if (!term || !input) return;
-    setLoading(true);
     try{
       let url = "";
       if (mode === "keyword") {
@@ -41,8 +36,6 @@ export default function HomePage() {
       );
     } catch (e) {
       console.error("search error", e);
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -69,49 +62,57 @@ export default function HomePage() {
     }
   };
 
-
   return (
-    <main className="p-6">
-      <h1 className="text-3xl font-bold">BearCal</h1>
-      <TermSelect selected={term} onSelect={setTerm} />
-      <CourseSearch onSearch={handleSearch}/>
-      {results.length > 0 && (
-      <div className="mt-6 space-y-4">
-        <h2 className="text-xl font-semibold">Results:</h2>
-        {results.map((course) => (
-          <CourseCard
-            key={course.CRN}
-            course={course}
-            isSelected={selectedCourses.some((c) => c.CRN === course.CRN)}
-            onToggle={() =>
-              setSelectedCourses((prev) =>
-                prev.some((c) => c.CRN === course.CRN)
-                  ? prev.filter((c) => c.CRN !== course.CRN)
-                  : [...prev, course]
-              )
-            }
-          />
-        ))}
+    <main className="min-h-screen flex flex-col items-center justify-center bg-[#0f0f0f] text-white px-4 py-10">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-center text-4xl font-semibold tracking-tighter">BearCal</h1>
+          <p className="text-center text-md text-muted-foreground">Generate your course calendar in seconds :D</p>
+        </div>
+        <div className="w-full max-w-2xl mx-auto p-8 bg-[#151515] rounded-xl shadow-xl border border-[#2a2a2a] space-y-6">
+            <TermSelect selected={term} onSelect={setTerm} />
+            <CourseSearch onSearch={handleSearch}/>
+        </div>
+        {results.length > 0 && (
+        <div className="mt-8 space-y-4">
+          <h2 className="text-xl font-semibold">Results:</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            {results.map((course) => (
+              <CourseCard
+                key={course.CRN}
+                course={course}
+                isSelected={selectedCourses.some((c) => c.CRN === course.CRN)}
+                onToggle={() =>
+                  setSelectedCourses((prev) =>
+                    prev.some((c) => c.CRN === course.CRN)
+                      ? prev.filter((c) => c.CRN !== course.CRN)
+                      : [...prev, course]
+                  )
+                }
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      {selectedCourses.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-2">Selected Courses:</h2>
+          <ul className="list-disc pl-5 mb-4">
+            {selectedCourses.map((c) => (
+              <li key={c.CRN}>
+                {c.Title} ({c.Subject} {c.ClassNumber}) - {c.CRN}
+              </li>
+            ))}
+          </ul>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            onClick={handleGenerateCalendar}
+          >
+            Generate Calendar
+          </button>
+        </div>
+      )}
       </div>
-    )}
-    {selectedCourses.length > 0 && (
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-2">Selected Courses:</h2>
-        <ul className="list-disc pl-5 mb-4">
-          {selectedCourses.map((c) => (
-            <li key={c.CRN}>
-              {c.Title} ({c.Subject} {c.ClassNumber}) - {c.CRN}
-            </li>
-          ))}
-        </ul>
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          onClick={handleGenerateCalendar}
-        >
-          Generate Calendar
-        </button>
-      </div>
-    )}
     </main>
   );
 }
