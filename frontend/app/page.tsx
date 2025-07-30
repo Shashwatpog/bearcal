@@ -46,6 +46,30 @@ export default function HomePage() {
     }
   }
 
+  const handleGenerateCalendar = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          term,
+          crns: selectedCourses.map((c) => c.CRN),
+        }),
+      });
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "calendar.ics";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Failed to generate ICS", e);
+    }
+  };
+
+
   return (
     <main className="p-6">
       <h1 className="text-3xl font-bold">BearCal</h1>
@@ -68,6 +92,24 @@ export default function HomePage() {
             }
           />
         ))}
+      </div>
+    )}
+    {selectedCourses.length > 0 && (
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-2">Selected Courses:</h2>
+        <ul className="list-disc pl-5 mb-4">
+          {selectedCourses.map((c) => (
+            <li key={c.CRN}>
+              {c.Title} ({c.Subject} {c.ClassNumber}) - {c.CRN}
+            </li>
+          ))}
+        </ul>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          onClick={handleGenerateCalendar}
+        >
+          Generate Calendar
+        </button>
       </div>
     )}
     </main>
