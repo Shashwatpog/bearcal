@@ -3,8 +3,10 @@
 import TermSelect from "@/components/TermSelect";
 import CourseSearch from "@/components/CourseSearch";
 import CourseCard from "@/components/CourseCard";
+import SelectedCoursesSidebar from "@/components/SelectedCoursesSidebar";
 import { Course } from "@/types/course";
 import { useState } from "react";
+import { useEffect } from "react";
 
 
 export default function HomePage() {
@@ -12,6 +14,20 @@ export default function HomePage() {
   const [term, setTerm] = useState("");
   const [results, setResults] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("selectedCourses");
+    if (stored) {
+      try {
+        setSelectedCourses(JSON.parse(stored));
+      } catch {}
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("selectedCourses", JSON.stringify(selectedCourses));
+  }, [selectedCourses]);
+
 
   const handleSearch = async (input: string, mode: "keyword" | "crn" | "subjectClass") => {
     if (!term || !input) return;
@@ -62,14 +78,18 @@ export default function HomePage() {
     }
   };
 
+  const handleRemoveCourse = (crn: number) => {
+    setSelectedCourses((prev) => prev.filter((c) => c.CRN !== crn));
+  };
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-[#0f0f0f] text-white px-4 py-10">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-[#0f0f0f] py-10 px-4 text-white relative">
+      <div className={`max-w-5xl w-full mx-auto space-y-8 ${selectedCourses.length > 0 ? "mr-100" : ""}`}>
         <div>
           <h1 className="text-center text-4xl font-semibold tracking-tighter">BearCal</h1>
           <p className="text-center text-md text-muted-foreground">Generate your course calendar in seconds :D</p>
         </div>
-        <div className="w-full max-w-2xl mx-auto p-8 bg-[#151515] rounded-xl shadow-xl border border-[#2a2a2a] space-y-6">
+        <div className="w-full max-w-2xl mx-auto p-8 bg-[#0a0909] rounded-xl shadow-xl border border-[#2a2a2a] space-y-6">
             <TermSelect selected={term} onSelect={setTerm} />
             <CourseSearch onSearch={handleSearch}/>
         </div>
@@ -94,25 +114,14 @@ export default function HomePage() {
           </div>
         </div>
       )}
-      {selectedCourses.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">Selected Courses:</h2>
-          <ul className="list-disc pl-5 mb-4">
-            {selectedCourses.map((c) => (
-              <li key={c.CRN}>
-                {c.Title} ({c.Subject} {c.ClassNumber}) - {c.CRN}
-              </li>
-            ))}
-          </ul>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-            onClick={handleGenerateCalendar}
-          >
-            Generate Calendar
-          </button>
-        </div>
-      )}
       </div>
+      {selectedCourses.length > 0 && (
+        <SelectedCoursesSidebar 
+          courses={selectedCourses} 
+          onGenerate={handleGenerateCalendar}
+          onRemove={handleRemoveCourse}
+        />
+      )}
     </main>
   );
 }

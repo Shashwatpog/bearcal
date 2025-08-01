@@ -30,6 +30,9 @@ export default function CourseCard({ course, isSelected, onToggle }: Props) {
             <p className="text-zinc-400 text-md text-muted-foreground">
               {course.Mode} | {course.Room}
             </p>
+            <p className="text-zinc-400 text-md text-muted-foreground">
+              {course.Dates}
+            </p>
         </div>
           <Button
           variant="outline"
