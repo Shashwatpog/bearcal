@@ -104,7 +104,7 @@ export default function HomePage() {
             <h2 className="text-xl font-semibold">Selected Courses:</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {selectedCourses.map((c) => (
-                <div key={c.CRN} className="bg-[#1e1e1e] p-4 rounded-lg shadow border border-[#2a2a2a]">
+                <div key={c.CRN} className="bg-[#1e1e1e] p-4 rounded-lg shadow border border-[#2a2a2a] hover:border-white">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-md font-medium">{c.Title}</h3>
