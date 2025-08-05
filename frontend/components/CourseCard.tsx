@@ -12,36 +12,50 @@ type Props = {
 
 export default function CourseCard({ course, isSelected, onToggle }: Props) {
   return (
-    <Card className={`transition-shadow hover:shadow-lg border border-gray-700 bg-[#181818] text-white`}>
-      <CardContent className="p-6 flex flex-col justify-between h-full space-y-4">
-        <div className="space-y-2">
-            <h3 className="font-bold text-lg">
-              {course.Title} ({course.Subject} {course.ClassNumber})
-            </h3>
-            <p className="text-zinc-400 text-md text-muted-foreground">
-              Time - {course.Time}
-            </p>
-            <p className="text-zinc-400 text-md text-muted-foreground">
-              Instructor - {course.Instructor}
-            </p>
-            <p className="text-zinc-400 text-md text-muted-foreground">
-              Course Number - {course.CRN}
-            </p>
-            <p className="text-zinc-400 text-md text-muted-foreground">
-              {course.Mode} | {course.Room}
-            </p>
-            <p className="text-zinc-400 text-md text-muted-foreground">
-              {course.Dates}
-            </p>
+    <Card className="transition-shadow hover:shadow-lg border border-gray-700 bg-[#181818] text-white rounded-xl">
+      <CardContent className="p-4 space-y-3">
+        <h3 className="font-bold text-base leading-tight">{course.Title}</h3>
+
+        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
+          <div className="bg-[#232323] rounded-md p-2">
+            <p className="text-muted-foreground">Subject</p>
+            <p className="font-medium">{course.Subject} {course.ClassNumber}</p>
+          </div>
+
+          <div className="bg-[#232323] rounded-md p-2">
+            <p className="text-muted-foreground">CRN</p>
+            <p className="font-medium">{course.CRN}</p>
+          </div>
+
+          <div className="bg-[#232323] rounded-md p-2">
+            <p className="text-muted-foreground">Instructor</p>
+            <p className="font-medium truncate">{course.Instructor}</p>
+          </div>
+
+          <div className="bg-[#232323] rounded-md p-2">
+            <p className="text-muted-foreground">Time</p>
+            <p className="font-medium">{course.Time}</p>
+          </div>
+
+          <div className="bg-[#232323] rounded-md p-2">
+            <p className="text-muted-foreground">Location</p>
+            <p className="font-medium">{course.Mode} | {course.Room}</p>
+          </div>
+
+          <div className="bg-[#232323] rounded-md p-2">
+            <p className="text-muted-foreground">Dates</p>
+            <p className="font-medium">{course.Dates}</p>
+          </div>
         </div>
-          <Button
-          variant="outline"
-          className={`mt-4 w-full font-semibold transition ${
-            isSelected
-            ? "bg-neutral-800 border-neutral-500 text-white hover:bg-neutral-700 hover:text-white"
-            : "bg-neutral-100 border-neutral-300 text-black hover:bg-neutral-800 hover:text-white"
-          }`}
+
+        <Button
           onClick={onToggle}
+          variant="outline"
+          className={`w-full text-xs font-semibold py-1.5 ${
+            isSelected
+              ? "bg-neutral-800 border-neutral-500 text-white hover:bg-neutral-700 hover:text-white"
+              : "bg-neutral-100 border-neutral-300 text-black hover:bg-neutral-800 hover:text-white"
+          }`}
         >
           {isSelected ? "Remove" : "Select"}
         </Button>
