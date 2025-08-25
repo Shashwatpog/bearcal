@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Databuddy } from '@databuddy/sdk/react';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,14 +28,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <Databuddy
-          clientId={process.env.NEXT_PUBLIC_DATABUDDY_CLIENT_ID!}
-          enableBatching={true}
-          trackScreenViews
-          trackPerformance
-          trackWebVitals={true}
-          trackErrors={true}
-        />
       </body>
     </html>
   );

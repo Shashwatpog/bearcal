@@ -9,7 +9,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-
 export default function HomePage() {
   const [term, setTerm] = useState("");
   const [results, setResults] = useState<Course[]>([]);
