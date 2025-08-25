@@ -29,6 +29,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
+		port = "8080"
 		log.Fatal("PORT not set in environment variables")
 	}
 	log.Println("Server running on port", port)
