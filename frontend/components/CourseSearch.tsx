@@ -38,9 +38,9 @@ export default function CourseSearch({ onSearch }: Props) {
                 className="w-full"
             >
                 <TabsList className="grid grid-cols-3 w-full mb-4 bg-stone-300 rounded-md overflow-hidden">
-                <TabsTrigger className="text-black" value="keyword">Course Name</TabsTrigger>
-                <TabsTrigger className="text-black" value="crn">Course Number</TabsTrigger>
-                <TabsTrigger className="text-black" value="subjectClass">Subject + Class</TabsTrigger>
+                <TabsTrigger className="text-black text-xs sm:text-sm" value="keyword">Course Name</TabsTrigger>
+                <TabsTrigger className="text-black text-xs sm:text-sm" value="crn">Course Number</TabsTrigger>
+                <TabsTrigger className="text-black text-xs sm:text-sm" value="subjectClass">Subject + Class</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="keyword">
