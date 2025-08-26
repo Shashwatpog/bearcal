@@ -11,6 +11,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   const [term, setTerm] = useState("");
+  const [termError, setTermError] = useState("");
   const [results, setResults] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,7 +31,13 @@ export default function HomePage() {
   }, [selectedCourses]);
 
   const handleSearch = async (input: string, mode: "keyword" | "crn" | "subjectClass") => {
-    if (!term || !input) return;
+    if (!term || !term.trim()) {
+      setTermError("Please select a term before searching.");
+      return;
+    }
+    setTermError("");
+    if (!input) return;
+    //if (!term || !input) return;
     try {
       let url = "";
       if (mode === "keyword") {
@@ -126,7 +133,13 @@ export default function HomePage() {
         </div>
 
         <div className="w-full max-w-2xl mx-auto p-8 bg-[#0a0909] rounded-xl shadow-xl border border-[#2a2a2a] space-y-6">
-          <TermSelect selected={term} onSelect={setTerm} />
+          <TermSelect 
+            selected={term} 
+            onSelect={(t) => { 
+              setTerm(t); 
+              if (termError) setTermError("");
+            }}
+            error={termError} />
           <CourseSearch onSearch={handleSearch} />
         </div>
 

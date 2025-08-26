@@ -7,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 type Props = {
   selected: string;
   onSelect: (term: string) => void;
+  error?: string;
 };
 
-export default function TermSelect({ selected, onSelect }: Props) {
+export default function TermSelect({ selected, onSelect, error }: Props) {
   const [terms, setTerms] = useState<string[]>([]);
 
   useEffect(() => {
@@ -28,7 +29,9 @@ export default function TermSelect({ selected, onSelect }: Props) {
     <div className="space-y-2">
       <Label>Select Term</Label>
       <Select value={selected || ""} onValueChange={onSelect}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger 
+          className={`w-full ${error ? "border-red-500 focus-visible:ring-red-500 focus-visible:ring-1" : ""}`}
+          aria-invalid={!!error}>
           <SelectValue placeholder="Choose a term" />
         </SelectTrigger>
         <SelectContent>
@@ -39,6 +42,7 @@ export default function TermSelect({ selected, onSelect }: Props) {
           ):null)}
         </SelectContent>
       </Select>
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }
